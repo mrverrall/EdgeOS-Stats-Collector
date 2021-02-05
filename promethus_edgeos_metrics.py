@@ -86,7 +86,7 @@ edgeos_system_mem = Gauge(
 
 def start_server(port=None):
 
-    if port and port.isnumeris():
+    if port and port.isnumeric():
         prometheus_export_port = port
     else:
         prometheus_export_port = 9788
