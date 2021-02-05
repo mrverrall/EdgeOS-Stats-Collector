@@ -69,8 +69,16 @@ edgeos_network_multicast_total = Gauge(
     ['interface'],
     registry=registry)
 
-start_http_server(9100)
-REGISTRY.register(registry)
+
+def start_server(port=None):
+
+    if port and port.isnumeris():
+        prometheus_export_port = port
+    else:
+        prometheus_export_port = 9788
+
+    start_http_server(prometheus_export_port)
+    REGISTRY.register(registry)
 
 
 def register_edgeos_metrics(metrics: dict):

@@ -15,6 +15,8 @@ def main():
     # derive these
     auth_params = {'username': username, 'password': password}
 
+    promethus_edgeos_metrics.start_server()
+
     websocket_exporter = edgeos.WS(
         server,
         auth_params,
@@ -27,4 +29,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
