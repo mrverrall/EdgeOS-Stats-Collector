@@ -62,11 +62,25 @@ edgeos_network_transmit_speed_bps = Gauge(
     ['interface'],
     registry=registry)
 
-
 edgeos_network_multicast_total = Gauge(
     'edgeos_network_multicast_total',
     'Network device statistic multicast.',
     ['interface'],
+    registry=registry)
+
+edgeos_system_cpu = Gauge(
+    'edgeos_system_cpu',
+    'System CPU Utilisation',
+    registry=registry)
+
+edgeos_system_uptime = Gauge(
+    'edgeos_system_uptime',
+    'System  Uptime',
+    registry=registry)
+
+edgeos_system_mem = Gauge(
+    'edgeos_system_mem',
+    'System Memory Utilisation',
     registry=registry)
 
 
@@ -99,3 +113,9 @@ def register_edgeos_metrics(metrics: dict):
             edgeos_network_transmit_speed_bps.labels(iface_name).set(iface_data['stats']['tx_bps'])
 
             edgeos_network_multicast_total.labels(iface_name).set(iface_data['stats']['multicast'])
+
+    if system_stats := metrics.get('system-stats'):
+
+        edgeos_system_cpu.set(system_stats['cpu'])
+        edgeos_system_uptime.set(system_stats['uptime'])
+        edgeos_system_mem.set(system_stats['mem'])
