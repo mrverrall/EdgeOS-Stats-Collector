@@ -103,12 +103,12 @@ class Session():
     def session_id(self, value):
         "This should not be set externally"
         self._session_id = value
-        asyncio.run(self.notitify_subscribers())
+        self.notitify_subscribers()
 
-    async def notitify_subscribers(self):
+    def notitify_subscribers(self):
         if self._session_id:
             for callback in self._observers:
-                await callback(self._session_id)
+                callback(self._session_id)
 
     def subscribe_to_session_id(self, callback):
         self._observers.append(callback)
@@ -124,15 +124,18 @@ class WS():
 
         self._session = Session(server, credetials)
         self._session.start_persistant_session()
-        self._session.subscribe_to_session_id(self._subscribe_to_ws_stats)
+        self._session.subscribe_to_session_id(self.session_subscriber)
 
         self._websocket = None
 
+    def session_subscriber(self, session_id):
+        asyncio.run(self._subscribe_to_ws_stats(session_id))
+
     async def _subscribe_to_ws_stats(self, session_id):
 
-        if self._websocket and not self._websocket.closed and self._session.session_id:
+        if self._websocket and not self._websocket.closed and session_id:
             subs = ",".join([f'{{"name":"{sub}"}}' for sub in self._subscriptions])
-            payload = f'{{"SUBSCRIBE":[{subs}],"UNSUBSCRIBE":[],"SESSION_ID":"{self._session.session_id}"}}'
+            payload = f'{{"SUBSCRIBE":[{subs}],"UNSUBSCRIBE":[],"SESSION_ID":"{session_id}"}}'
             payload = f"{len(payload)}\n{payload}"
 
             await self._websocket.send(payload)
@@ -143,7 +146,7 @@ class WS():
         while True:
             try:
                 async with websockets.connect(ws_uri, ssl=ssl_unverified()) as self._websocket:
-                    await self._session.notitify_subscribers()
+                    self._session.notitify_subscribers()
                     async for message in self._websocket:
                         try:
                             if j_msg := json.loads(message[message.find('{'):]):
