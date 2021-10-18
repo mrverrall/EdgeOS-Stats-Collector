@@ -63,10 +63,9 @@ class Session():
         ar = session.post(self._base_uri, data=self._creds, verify=False, allow_redirects=False)
 
         if ar.status_code == 303:
-            self._active.set()
             self._req_session = session
             self.session_id = ar.cookies.get('PHPSESSID')
-
+            self._active.set()
             return True
 
         return False
